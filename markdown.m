@@ -7,12 +7,12 @@ NSData* renderMarkdown(NSURL* url)
                                                            pathForResource:@"styles" ofType:@"css"]
                                                  encoding:NSUTF8StringEncoding
                                                     error:nil];
-
+    
     NSStringEncoding usedEncoding = 0;
     NSError *e = nil;
-
+    
     NSString *source = [NSString stringWithContentsOfURL:url usedEncoding:&usedEncoding error:&e];
-
+    
     if (usedEncoding == 0) {
         NSLog(@"Wasn't able to determine encoding for file “%@”", [url path]);
     }
@@ -21,14 +21,13 @@ NSData* renderMarkdown(NSURL* url)
     NSString *html = [NSString stringWithFormat:@"<html>"
                                                  "<head>"
                                                  "<meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />"
-                                                 "<base href='%@' />"
                                                  "<style type=\"text/css\">%@</style>"
                                                  "<base href=\"%@\"/>"
                                                  "</head>"
                                                  "<body>%@</body>"
-                                                 "</html>",
+                                                 "</html>", 
                                                  styles, url, [NSString stringWithUTF8String:output]];
-
+    
     free(output);
     return [html dataUsingEncoding:NSUTF8StringEncoding];
 }

@@ -4,7 +4,7 @@
 #include "markdown.h"
 
 /* -----------------------------------------------------------------------------
-	Generate a thumbnail for file
+    Generate a thumbnail for file
 
    This function's job is to create thumbnail for designated file as fast as
    possible
@@ -14,23 +14,20 @@
 #define MINIMUM_ASPECT_RATIO (1.0/2.0)
 
 
-OSStatus GenerateThumbnailForURL(void *thisInterface,
-								 QLThumbnailRequestRef thumbnail,
-								 CFURLRef url, CFStringRef contentTypeUTI,
+OSStatus GenerateThumbnailForURL(void *thisInterface, 
+								 QLThumbnailRequestRef thumbnail, 
+								 CFURLRef url, CFStringRef contentTypeUTI, 
 								 CFDictionaryRef options, CGSize maxSize)
 {
-	NSData *data = renderMarkdown((NSURL*) url);
+    NSData *data = renderMarkdown((NSURL*) url);
 
-	if (data) {
+    if (data) {
 		NSRect viewRect = NSMakeRect(0.0, 0.0, 600.0, 800.0);
 		float scale = maxSize.height / 800.0;
 		NSSize scaleSize = NSMakeSize(scale, scale);
 		CGSize thumbSize = NSSizeToCGSize(
-							NSMakeSize((maxSize.width * (600.0/800.0)),
-									   maxSize.height));
-
-		dispatch_sync(dispatch_get_main_queue(),
-		^{
+                            NSMakeSize((maxSize.width * (600.0/800.0)), 
+                                       maxSize.height));
 
         WebView* webView = [[[WebView alloc] initWithFrame: viewRect] autorelease];
 		[webView scaleUnitSquareToSize: scaleSize];
@@ -40,38 +37,34 @@ OSStatus GenerateThumbnailForURL(void *thisInterface,
                      textEncodingName: @"utf-8"
                               baseURL: nil];
 
-			while([webView isLoading]) {
-				CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
-			}
+		while([webView isLoading]) {
+			CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
+		}
 
-			[webView display];
+		[webView display];
 
-			CGContextRef context =
-				QLThumbnailRequestCreateContext(thumbnail, thumbSize, false, NULL);
+		CGContextRef context = 
+			QLThumbnailRequestCreateContext(thumbnail, thumbSize, false, NULL);
 
-			if (context) {
-				NSGraphicsContext* nsContext =
-					[NSGraphicsContext
-					graphicsContextWithGraphicsPort: (void*) context
-					flipped: [webView isFlipped]];
+		if (context) {
+			NSGraphicsContext* nsContext = 
+						[NSGraphicsContext
+							graphicsContextWithGraphicsPort: (void*) context 
+													flipped: [webView isFlipped]];
 
-				[webView displayRectIgnoringOpacity: [webView bounds]
-					inContext: nsContext];
+			[webView displayRectIgnoringOpacity: [webView bounds]
+									  inContext: nsContext];
 
-				QLThumbnailRequestFlushContext(thumbnail, context);
+			QLThumbnailRequestFlushContext(thumbnail, context);
 
-				CFRelease(context);
-			}
+			CFRelease(context);
+		}
+    }
 
-			});
-
-
-	}
-
-	return noErr;
+    return noErr;
 }
 
 void CancelThumbnailGeneration(void* thisInterface, QLThumbnailRequestRef thumbnail)
 {
-	// implement only if supported
+    // implement only if supported
 }
