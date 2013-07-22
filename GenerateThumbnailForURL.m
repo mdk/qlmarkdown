@@ -14,9 +14,9 @@
 #define MINIMUM_ASPECT_RATIO (1.0/2.0)
 
 
-OSStatus GenerateThumbnailForURL(void *thisInterface, 
-								 QLThumbnailRequestRef thumbnail, 
-								 CFURLRef url, CFStringRef contentTypeUTI, 
+OSStatus GenerateThumbnailForURL(void *thisInterface,
+								 QLThumbnailRequestRef thumbnail,
+								 CFURLRef url, CFStringRef contentTypeUTI,
 								 CFDictionaryRef options, CGSize maxSize)
 {
 	NSData *data = renderMarkdown((NSURL*) url);
@@ -26,19 +26,19 @@ OSStatus GenerateThumbnailForURL(void *thisInterface,
 		float scale = maxSize.height / 800.0;
 		NSSize scaleSize = NSMakeSize(scale, scale);
 		CGSize thumbSize = NSSizeToCGSize(
-							NSMakeSize((maxSize.width * (600.0/800.0)), 
+							NSMakeSize((maxSize.width * (600.0/800.0)),
 									   maxSize.height));
-		
+
 		dispatch_sync(dispatch_get_main_queue(),
 		^{
 
-			WebView* webView = [[WebView alloc] initWithFrame: viewRect];
-			[webView scaleUnitSquareToSize: scaleSize];
-			[[[webView mainFrame] frameView] setAllowsScrolling:NO];
-			[[webView mainFrame] loadData: data
-				MIMEType: @"text/html"
-				textEncodingName: @"utf-8"
-				baseURL: [[url URLByDeletingLastPathComponent] filePathURL]];
+        WebView* webView = [[[WebView alloc] initWithFrame: viewRect] autorelease];
+		[webView scaleUnitSquareToSize: scaleSize];
+        [[[webView mainFrame] frameView] setAllowsScrolling:NO];
+        [[webView mainFrame] loadData: data
+                             MIMEType: @"text/html"
+                     textEncodingName: @"utf-8"
+                              baseURL: nil];
 
 			while([webView isLoading]) {
 				CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
@@ -46,13 +46,13 @@ OSStatus GenerateThumbnailForURL(void *thisInterface,
 
 			[webView display];
 
-			CGContextRef context = 
+			CGContextRef context =
 				QLThumbnailRequestCreateContext(thumbnail, thumbSize, false, NULL);
 
 			if (context) {
-				NSGraphicsContext* nsContext = 
+				NSGraphicsContext* nsContext =
 					[NSGraphicsContext
-					graphicsContextWithGraphicsPort: (void*) context 
+					graphicsContextWithGraphicsPort: (void*) context
 					flipped: [webView isFlipped]];
 
 				[webView displayRectIgnoringOpacity: [webView bounds]
@@ -65,7 +65,7 @@ OSStatus GenerateThumbnailForURL(void *thisInterface,
 
 			});
 
-		
+
 	}
 
 	return noErr;
